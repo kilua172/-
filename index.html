@@ -40,11 +40,6 @@
             margin-bottom: 10px;
         }
         
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-        
         .game-controls {
             display: flex;
             justify-content: center;
@@ -303,6 +298,16 @@
             display: block;
         }
         
+        .password-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: none;
+            text-align: center;
+        }
+        
         @media (max-width: 900px) {
             .game-board {
                 grid-template-columns: repeat(3, 1fr);
@@ -339,8 +344,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>СВОЯ ИГРА - ОБЛАЧНАЯ ВЕРСИЯ</h1>
-            <div class="subtitle">Изменения сохраняются в облаке и доступны на всех устройствах!</div>
+            <h1>СВОЯ ИГРА</h1>
         </header>
         
         <div class="cloud-controls">
@@ -405,6 +409,18 @@
         </div>
     </div>
     
+    <div class="modal" id="password-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-password-modal">×</button>
+            <h2>Введите пароль для редактирования</h2>
+            <input type="password" class="password-input" id="password-input" placeholder="Введите пароль">
+            <div class="modal-controls">
+                <button id="confirm-password">Подтвердить</button>
+                <button id="cancel-password">Отмена</button>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // Сначала объявляем все переменные
         let gameData = null;
@@ -420,6 +436,8 @@
         let joinModal = null;
         let gameCodeInput = null;
         let statusMessage = null;
+        let passwordModal = null;
+        let passwordInput = null;
 
         // Конфигурация Firebase для вашей базы данных
         const firebaseConfig = {
@@ -431,6 +449,9 @@
             messagingSenderId: "123456789",
             appId: "1:123456789:web:abcdef123456"
         };
+
+        // Постоянный пароль
+        const EDIT_PASSWORD = "1803";
 
         // Инициализация Firebase
         try {
@@ -472,6 +493,8 @@
             joinModal = document.getElementById('join-modal');
             gameCodeInput = document.getElementById('game-code-input');
             statusMessage = document.getElementById('status-message');
+            passwordModal = document.getElementById('password-modal');
+            passwordInput = document.getElementById('password-input');
 
             // Инициализация игровых данных
             gameData = {
@@ -522,6 +545,21 @@
                 editMode: false,
                 gameCode: null
             };
+        }
+
+        // Проверка пароля
+        function checkPassword() {
+            const input = passwordInput.value.trim();
+            if (input === EDIT_PASSWORD) {
+                passwordModal.style.display = 'none';
+                passwordInput.value = '';
+                toggleEditMode();
+                showStatus('Режим редактирования активирован');
+            } else {
+                showStatus('Неверный пароль', 'error');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
         }
 
         // Генерация случайного кода игры
@@ -826,6 +864,11 @@
             }
         }
         
+        function requestEditMode() {
+            passwordModal.style.display = 'flex';
+            passwordInput.focus();
+        }
+        
         function saveChanges() {
             saveToFirebase();
             toggleEditMode();
@@ -868,7 +911,7 @@
             document.getElementById('close-join-modal').addEventListener('click', () => joinModal.style.display = 'none');
             
             document.getElementById('start-game').addEventListener('click', startNewGame);
-            document.getElementById('edit-mode').addEventListener('click', toggleEditMode);
+            document.getElementById('edit-mode').addEventListener('click', requestEditMode);
             document.getElementById('reset-game').addEventListener('click', resetGame);
             document.getElementById('save-changes').addEventListener('click', saveChanges);
             document.getElementById('cancel-edit').addEventListener('click', toggleEditMode);
@@ -876,6 +919,24 @@
             document.getElementById('submit-answer').addEventListener('click', checkAnswer);
             document.getElementById('show-answer').addEventListener('click', showAnswer);
             document.getElementById('next-question').addEventListener('click', nextQuestion);
+            
+            // Обработчики для модального окна пароля
+            document.getElementById('confirm-password').addEventListener('click', checkPassword);
+            document.getElementById('cancel-password').addEventListener('click', () => {
+                passwordModal.style.display = 'none';
+                passwordInput.value = '';
+            });
+            document.getElementById('close-password-modal').addEventListener('click', () => {
+                passwordModal.style.display = 'none';
+                passwordInput.value = '';
+            });
+            
+            // Обработчик ввода пароля по Enter
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkPassword();
+                }
+            });
         });
     </script>
 </body>
