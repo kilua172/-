@@ -350,7 +350,6 @@
                 <button id="create-game">Создать новую игру</button>
                 <button id="join-game">Присоединиться к игре</button>
                 <button id="copy-code">Скопировать код</button>
-                <button id="share-link">Поделиться ссылкой</button>
             </div>
         </div>
         
@@ -450,11 +449,11 @@
             statusMessage.textContent = message;
             statusMessage.className = "status-message";
             statusMessage.classList.add(type === "success" ? "status-success" : "status-error");
-            statusMessage.style.display = "block";
+            statusMessage.style.display = 'block';
             
             setTimeout(() => {
                 if (statusMessage) {
-                    statusMessage.style.display = "none";
+                    statusMessage.style.display = 'none';
                 }
             }, 5000);
         }
@@ -514,9 +513,9 @@
                     ]}
                 ],
                 players: [
-                    { name: "Игрок 1", score: 0, active: true },
-                    { name: "Игрок 2", score: 0, active: false },
-                    { name: "Игрок 3", score: 0, active: false }
+                    { name: "Команда 1", score: 0, active: true },
+                    { name: "Команда 2", score: 0, active: false },
+                    { name: "Команда 3", score: 0, active: false }
                 ],
                 usedQuestions: [],
                 currentQuestion: null,
@@ -637,36 +636,6 @@
                     document.body.removeChild(textArea);
                     showStatus('Код игры скопирован: ' + gameData.gameCode);
                 });
-        }
-
-        // Поделиться ссылкой
-        function shareLink() {
-            if (!gameData.gameCode) {
-                showStatus('Сначала создайте или загрузите игру', "error");
-                return;
-            }
-            
-            const url = window.location.origin + window.location.pathname + '?code=' + gameData.gameCode;
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Присоединяйтесь к игре "Своя игра"',
-                    text: 'Играйте в "Свою игру" вместе со мной!',
-                    url: url
-                });
-            } else {
-                navigator.clipboard.writeText(url)
-                    .then(() => showStatus('Ссылка скопирована в буфер обмена'))
-                    .catch(() => {
-                        const textArea = document.createElement('textarea');
-                        textArea.value = url;
-                        document.body.appendChild(textArea);
-                        textArea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textArea);
-                        showStatus('Ссылка скопирована в буфер обмена');
-                    });
-            }
         }
 
         // Остальные функции игры
@@ -890,7 +859,6 @@
             document.getElementById('create-game').addEventListener('click', createNewGame);
             document.getElementById('join-game').addEventListener('click', () => joinModal.style.display = 'flex');
             document.getElementById('copy-code').addEventListener('click', copyGameCode);
-            document.getElementById('share-link').addEventListener('click', shareLink);
             document.getElementById('save-cloud').addEventListener('click', saveToFirebase);
             document.getElementById('load-cloud').addEventListener('click', () => loadFromFirebase());
             document.getElementById('confirm-join').addEventListener('click', () => {
